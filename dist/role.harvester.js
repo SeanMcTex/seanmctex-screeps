@@ -1,68 +1,84 @@
+var setBuildMode = (creep) => {
+	creep.memory.building = true;
+	creep.say('🚧 build');
+}
+
+var harvestFromSource = (creep) => {
+	var sources = creep.room.find(FIND_SOURCES);
+	if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+		creep.moveTo(sources[0], {
+			visualizePathStyle: {
+				stroke: '#ffaa00'
+			}
+		});
+	}
+}
+
+var structuresNeedingEnergy = (creep) => {
+	return creep.room.find(FIND_STRUCTURES, {
+		filter: (structure) => {
+			return (structure.structureType == STRUCTURE_EXTENSION ||
+				structure.structureType == STRUCTURE_SPAWN ||
+				structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity;
+		}
+	});
+}
+
+var giveEnergyTo = (creep, structure) => {
+	if (creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+		creep.moveTo(structure, {
+			visualizePathStyle: {
+				stroke: '#ffffff'
+			}
+		});
+	}
+}
+
+var buildAtSite = (creep, site) => {
+	if (creep.build(site) == ERR_NOT_IN_RANGE) {
+		creep.moveTo(site, {
+			visualizePathStyle: {
+				stroke: '#ffffff'
+			}
+		});
+	}
+}
+
+var finishedBuilding = (creep) => {
+	creep.memory.building = false;
+	creep.say('🔄 harvest');
+}
+
 var roleHarvester = {
 
 	/** @param {Creep} creep **/
 	run: function(creep) {
 		if (creep.carry.energy < creep.carryCapacity && !creep.memory.building) {
-			var sources = creep.room.find(FIND_SOURCES);
-			if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-				creep.moveTo(sources[0], {
-					visualizePathStyle: {
-						stroke: '#ffaa00'
-					}
-				});
-			}
+			harvestFromSource(creep);
 		} else {
-			var targets = creep.room.find(FIND_STRUCTURES, {
-				filter: (structure) => {
-					return (structure.structureType == STRUCTURE_EXTENSION ||
-						structure.structureType == STRUCTURE_SPAWN ||
-						structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity;
-				}
-			});
+			var targets = structuresNeedingEnergy(creep);
 			if (targets.length > 0) {
-				if (creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-					creep.moveTo(targets[0], {
-						visualizePathStyle: {
-							stroke: '#ffffff'
-						}
-					});
-				}
+				giveEnergyTo(creep, targets[0]);
 			} else {
-
 				if (creep.memory.building && creep.carry.energy == 0) {
-					creep.memory.building = false;
-					creep.say('🔄 harvest');
+					finishedBuilding(creep);
 				}
 				if (!creep.memory.building && creep.carry.energy == creep.carryCapacity) {
-					creep.memory.building = true;
-					creep.say('🚧 build');
+					setBuildMode(creep);
 				}
 
 				if (creep.memory.building) {
 					var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
 					if (targets.length) {
-						if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-							creep.moveTo(targets[0], {
-								visualizePathStyle: {
-									stroke: '#ffffff'
-								}
-							});
-						}
+						buildAtSite(creep, targets[0]);
 					}
 				} else {
-					var sources = creep.room.find(FIND_SOURCES);
-					if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-						creep.moveTo(sources[0], {
-							visualizePathStyle: {
-								stroke: '#ffaa00'
-							}
-						});
-					}
+					harvestFromSource(creep);
 				}
 			}
 		}
 	}
-	
+
 };
 
 module.exports = roleHarvester;
