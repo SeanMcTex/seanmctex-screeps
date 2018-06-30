@@ -1,14 +1,15 @@
 var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
+var energyMover = require('role.energyMover');
 
 module.exports.loop = function() {
 
-	var tower = Game.getObjectById('TOWER_ID');
+	var tower = Game.getObjectById('5b3330e21e593734fadcad8e');
 	if (tower) {
 		var closestDamagedStructure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
-			filter: (structure) => structure.hits < structure.hitsMax
+			filter: (structure) => { return ( structure.hits < structure.hitsMax ) && ( structure.structureType != STRUCTURE_WALL ) }
 		});
-		if (closestDamagedStructure) {
+		if (closestDamagedStructure && ( tower.energy > tower.energyCapacity * 0.75 ) ) {
 			tower.repair(closestDamagedStructure);
 		}
 
