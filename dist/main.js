@@ -44,7 +44,7 @@ module.exports.loop = function() {
 			}
 		});
 
-	} else if (energyMovers.length < 3) {
+	} else if (energyMovers.length < 4) {
 		var newName = 'EnergyMover' + Game.time;
 		console.log('Spawning new EnergyMover: ' + newName);
 		Game.spawns['Spawn1'].spawnCreep([WORK, WORK, CARRY, CARRY, MOVE], newName, {
@@ -52,7 +52,7 @@ module.exports.loop = function() {
 				role: 'energyMover'
 			}
 		});
-	} else if (upgraders.length < 2) {
+	} else if (upgraders.length < 3) {
 		var newName = 'Upgrader' + Game.time;
 		console.log('Spawning new upgrader: ' + newName);
 		Game.spawns['Spawn1'].spawnCreep([WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE], newName, {
