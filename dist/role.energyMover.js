@@ -96,10 +96,13 @@ var harvest = (creep) => {
 
 var deliver = (creep) => {
 	var energyStorageEmpty = creep.carry.energy == 0;
-	if (energyStorageEmpty) {
+	var targetEnergyDeficit = getTarget( creep ).energyCapacity - getTarget( creep ).energy;
+	if (energyStorageEmpty || ( targetEnergyDeficit == 0 ) ) {
 		setState(creep, StatesEnum.idle);
 		return;
 	}
+	
+	
 
 	var result = creep.transfer(getTarget(creep), RESOURCE_ENERGY);
 
@@ -174,6 +177,11 @@ var roleEnergyMover = {
 				idle( creep );
 				break;
 		}
+		
+		if ( getState( creep ) == StatesEnum.idle ) {
+			idle( creep );
+		}
+		
 	}
 
 };
